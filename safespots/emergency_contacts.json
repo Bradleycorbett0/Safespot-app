@@ -1,0 +1,27 @@
+[
+  {
+    "label": "Emergency Services (999)",
+    "type": "call",
+    "value": "999"
+  },
+  {
+    "label": "NHS (111)",
+    "type": "call",
+    "value": "111"
+  },
+  {
+    "label": "Samaritans",
+    "type": "web",
+    "value": "https://www.samaritans.org"
+  },
+  {
+    "label": "Andy's Man Club",
+    "type": "web",
+    "value": "https://andysmanclub.co.uk"
+  },
+  {
+    "label": "NHS Website",
+    "type": "web",
+    "value": "https://www.nhs.uk"
+  }
+]
