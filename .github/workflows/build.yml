@@ -3,12 +3,11 @@ name: Build APK
 on:
   push:
     branches:
-      - master
       - main
+      - master
 
 jobs:
   build:
-    name: Build APK with Buildozer
     runs-on: ubuntu-latest
 
     steps:
@@ -24,21 +23,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y zip unzip libncurses6 libstdc++6
-
-      - name: Install Android SDK
-        uses: android-actions/setup-android@v2
-
-      - name: Install Buildozer
-        run: |
-          python -m pip install --upgrade pip
-          pip install buildozer
+          python -m pip install --upgrade pip setuptools cython
 
       - name: Build APK with Buildozer
         run: |
+          pip install buildozer
           buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: safespot-app.apk
+          name: safespot-apk
           path: bin/*.apk
