@@ -25,10 +25,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y zip unzip libncurses6 libstdc++6
 
-      - name: Install Android SDK and accept licenses
-        run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v2
 
       - name: Install Buildozer
         run: |
