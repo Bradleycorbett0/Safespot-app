@@ -2,9 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master]
 
 jobs:
   build:
@@ -26,13 +24,16 @@ jobs:
           pip install --upgrade pip
           pip install Cython buildozer
 
-      - name: Download and set up Android SDK manually
+      - name: Set up Android SDK manually
         run: |
           mkdir -p $HOME/android-sdk
           cd $HOME/android-sdk
-          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O tools.zip
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
           unzip tools.zip -d cmdline-tools
           mv cmdline-tools cmdline-tools/latest
+
+      - name: Accept Android SDK licenses
+        run: yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Install SDK components
         run: |
