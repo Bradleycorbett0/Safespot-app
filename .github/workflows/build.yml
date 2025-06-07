@@ -7,31 +7,28 @@ on:
 
 jobs:
   build:
-    name: Build APK with Buildozer
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
           python-version: '3.10'
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip unzip libncurses6 libstdc++6 python3-pip
-          pip install --upgrade pip
-          pip install buildozer cython
+          sudo apt-get install -y zip unzip cython libncurses6 libstdc++6
 
       - name: Install Android SDK manually
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
           cd $HOME/android-sdk/cmdline-tools
-          curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          unzip commandlinetools.zip
+          curl -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip cmdline-tools.zip
           mv cmdline-tools latest
           export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
           yes | sdkmanager --sdk_root=$HOME/android-sdk --licenses
@@ -40,9 +37,9 @@ jobs:
             "platforms;android-33" \
             "build-tools;34.0.0"
 
-      - name: Build APK
+      - name: Build APK with Buildozer
         run: |
-          export PATH=$PATH:$HOME/android-sdk/platform-tools
+          pip install buildozer
           buildozer android debug
 
       - name: Upload APK
