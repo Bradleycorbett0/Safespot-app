@@ -2,10 +2,12 @@ name: Build APK
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - main
 
 jobs:
   build:
+    name: Build APK with Buildozer
     runs-on: ubuntu-latest
 
     steps:
@@ -22,33 +24,29 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y zip unzip libncurses6 libstdc++6 python3-pip
           pip install --upgrade pip
-          pip install Cython buildozer
+          pip install buildozer cython
 
-      - name: Set up Android SDK manually
+      - name: Install Android SDK manually
         run: |
-          mkdir -p $HOME/android-sdk
-          cd $HOME/android-sdk
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
-          unzip tools.zip -d cmdline-tools
-          mv cmdline-tools cmdline-tools/latest
-
-      - name: Accept Android SDK licenses
-        run: yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-
-      - name: Install SDK components
-        run: |
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
+          curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools.zip
+          mv cmdline-tools latest
+          export PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin
+          yes | sdkmanager --sdk_root=$HOME/android-sdk --licenses
+          yes | sdkmanager --sdk_root=$HOME/android-sdk \
             "platform-tools" \
             "platforms;android-33" \
-            "build-tools;36.0.0"
+            "build-tools;34.0.0"
 
-      - name: Build APK with Buildozer
+      - name: Build APK
         run: |
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export PATH=$PATH:$HOME/android-sdk/platform-tools
           buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
-          name: safespot-app.apk
+          name: safespot-debug-apk
           path: bin/*.apk
