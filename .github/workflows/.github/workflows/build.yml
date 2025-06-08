@@ -20,9 +20,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y zip unzip openjdk-11-jdk
-        pip install --upgrade pip
+        python -m pip install --upgrade pip
         pip install cython buildozer
 
     - name: Accept Android SDK Licenses & Install SDK
@@ -36,16 +34,12 @@ jobs:
         mv latest cmdline-tools/
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
-        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
-          "platform-tools" \
-          "platforms;android-33" \
-          "build-tools;34.0.0"
+        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-33" "build-tools;34.0.0"
 
     - name: Build APK with Buildozer
       run: |
         export ANDROIDSDK=$HOME/android-sdk
-        export PATH=$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
+        export PATH=$ANDROIDSDK/build-tools/34.0.0:$ANDROIDSDK/platform-tools:$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
         buildozer android debug
 
     - name: Upload APK
