@@ -39,7 +39,10 @@ jobs:
     - name: Build APK with Buildozer
       run: |
         export ANDROIDSDK=$HOME/android-sdk
-        export PATH=$ANDROIDSDK/build-tools/34.0.0:$ANDROIDSDK/platform-tools:$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
+        export PATH=$ANDROIDSDK/platform-tools:$ANDROIDSDK/build-tools/34.0.0:$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
+        export ANDROID_NDK_HOME=$ANDROIDSDK/ndk
+        export PATH=$ANDROIDSDK/build-tools/34.0.0:$PATH
+        which aidl || echo "AIDL still not found"
         buildozer android debug
 
     - name: Upload APK
