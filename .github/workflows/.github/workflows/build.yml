@@ -6,43 +6,47 @@ on:
 
 jobs:
   build:
-    name: Build APK with Buildozer
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip unzip libncurses6 libstdc++6 cython wget
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install cython buildozer
 
-      - name: Install Android SDK + Build Tools 36
-        run: |
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          cd $HOME/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
-          unzip tools.zip
-          mv cmdline-tools latest
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk \
-            "build-tools;36.0.0" "platform-tools" "platforms;android-29"
+    - name: Accept Android SDK Licenses & Install SDK
+      run: |
+        mkdir -p $HOME/android-sdk
+        cd $HOME/android-sdk
+        curl -o sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
+        unzip sdk.zip -d cmdline-tools
+        mv cmdline-tools cmdline-tools-temp
+        mkdir cmdline-tools
+        mv cmdline-tools-temp cmdline-tools/latest
+        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+        yes | sdkmanager --licenses
+        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+          "platform-tools" \
+          "platforms;android-33" \
+          "build-tools;34.0.0"
 
-      - name: Set environment variables
-        run: |
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/36.0.0:$PATH" >> $GITHUB_ENV
+    - name: Build APK with Buildozer
+      run: |
+        export ANDROIDSDK=$HOME/android-sdk
+        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/34.0.0:$PATH
+        buildozer android debug
 
-      - name: Install buildozer
-        run: |
-          pip install --upgrade pip
-          pip install cython buildozer
-
-      - name: Build APK
-        run: |
-          buildozer android debug
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: safespot-debug-apk
+        path: bin/*.apk
