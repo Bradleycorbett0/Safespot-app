@@ -21,7 +21,7 @@ jobs:
         pip install --upgrade pip
         pip install cython buildozer
 
-    - name: Accept Android SDK Licenses & Install SDK
+    - name: Set up Android SDK manually
       run: |
         mkdir -p $HOME/android-sdk
         cd $HOME/android-sdk
@@ -40,9 +40,9 @@ jobs:
 
     - name: Build APK with Buildozer
       run: |
-        export ANDROIDSDK=$HOME/android-sdk
         export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/34.0.0:$PATH
+        export ANDROIDSDK=$HOME/android-sdk
+        export PATH=$ANDROID_SDK_ROOT/build-tools/34.0.0:$ANDROID_SDK_ROOT/platform-tools:$PATH
         buildozer android debug
 
     - name: Upload APK
