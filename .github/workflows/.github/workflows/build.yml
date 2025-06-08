@@ -10,35 +10,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Post Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install cython buildozer
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install cython buildozer
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          cmdline-tools-version: latest
-          packages: |
-            platform-tools
-            platforms;android-33
-            build-tools;34.0.0
+    - name: Accept Android SDK Licenses & Install SDK
+      run: |
+        mkdir -p $HOME/android-sdk
+        cd $HOME/android-sdk
+        curl -o sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip sdk.zip
+        mv cmdline-tools latest
+        mkdir -p cmdline-tools/latest
+        mv latest cmdline-tools/
+        export ANDROID_SDK_ROOT=$HOME/android-sdk
+        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-33" "build-tools;34.0.0"
 
-      - name: Build APK with Buildozer
-        run: |
-          export ANDROIDSDK=$HOME/android-sdk
-          buildozer android debug
+    - name: Build APK with Buildozer
+      run: |
+        export ANDROIDSDK=$HOME/android-sdk
+        export PATH=$ANDROIDSDK/platform-tools:$PATH
+        buildozer android debug
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: safespot-debug-apk
-          path: bin/*.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: safespot-debug-apk
+        path: bin/*.apk
