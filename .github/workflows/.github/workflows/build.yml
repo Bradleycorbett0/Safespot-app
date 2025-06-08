@@ -2,47 +2,37 @@ name: Build APK
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build:
+  build_android:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Checkout repo
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Install dependencies
+    - name: Install Buildozer & Cython
       run: |
-        python -m pip install --upgrade pip
+        pip install --upgrade pip
         pip install cython buildozer
 
-    - name: Accept Android SDK Licenses & Install SDK
-      run: |
-        mkdir -p $HOME/android-sdk
-        cd $HOME/android-sdk
-        curl -o sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
-        unzip sdk.zip
-        mv cmdline-tools latest
-        mkdir -p cmdline-tools/latest
-        mv latest cmdline-tools/
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-33" "build-tools;34.0.0"
+    - name: Set up Android SDK & Build Tools
+      uses: android/setup-android@v2
+      with:
+        sdk: '33'
+        build-tools: '34.0.0'
+        ndk: none
+        components: android-33,build-tools;34.0.0,platform-tools
 
     - name: Build APK with Buildozer
       run: |
-        export ANDROIDSDK=$HOME/android-sdk
-        export PATH=$ANDROIDSDK/platform-tools:$ANDROIDSDK/build-tools/34.0.0:$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
-        export ANDROID_NDK_HOME=$ANDROIDSDK/ndk
-        export PATH=$ANDROIDSDK/build-tools/34.0.0:$PATH
-        which aidl || echo "AIDL still not found"
+        export ANDROIDSDK="$ANDROID_SDK_ROOT"           # setup-android exports this
         buildozer android debug
 
     - name: Upload APK
